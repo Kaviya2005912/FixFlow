@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Create Staff Account — FixFlow Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto w-full px-gutter py-space-xl">
+  <div class="mb-space-lg">
+    <a href="{{ url_for('admin.manage_users') }}" class="flex items-center gap-1 text-label-md text-on-surface-variant hover:text-primary transition-colors mb-space-md">
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Users
+    </a>
+    <h1 class="text-headline-lg font-bold text-on-surface">Create Staff Account</h1>
+    <p class="text-body-md text-on-surface-variant mt-1">Add a new maintenance staff member to the system.</p>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+    <form method="POST" action="{{ url_for('admin.create_staff') }}" class="space-y-space-lg">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+      <div>
+        <label class="block text-label-lg text-on-surface mb-1.5" for="full_name">Full Name <span class="text-error">*</span></label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">person</span>
+          <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                 id="full_name" name="full_name" placeholder="Staff member's full name" required type="text"
+                 value="{{ form_data.get('full_name', '') if form_data else '' }}"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-label-lg text-on-surface mb-1.5" for="email">Email Address <span class="text-error">*</span></label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">alternate_email</span>
+          <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                 id="email" name="email" placeholder="staff@institution.edu" required type="email"
+                 value="{{ form_data.get('email', '') if form_data else '' }}"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-label-lg text-on-surface mb-1.5" for="password">Password <span class="text-error">*</span></label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">lock</span>
+          <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                 id="password" name="password" placeholder="At least 8 characters" required type="password" minlength="8"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-label-lg text-on-surface mb-1.5" for="confirm_password">Confirm Password <span class="text-error">*</span></label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">lock_reset</span>
+          <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                 id="confirm_password" name="confirm_password" placeholder="Re-enter password" required type="password"/>
+        </div>
+      </div>
+
+      <div class="p-space-md rounded-xl bg-surface-container-low flex items-start gap-space-sm">
+        <span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">info</span>
+        <p class="text-body-sm text-on-surface-variant">This account will have the <strong>Staff</strong> role. Staff can view assigned complaints and update work progress.</p>
+      </div>
+
+      <div class="flex gap-space-sm pt-space-sm">
+        <button type="submit" class="flex-1 h-11 rounded-lg bg-primary text-on-primary text-label-lg font-semibold flex items-center justify-center gap-2 shadow-md hover:bg-primary-container transition-all">
+          <span class="material-symbols-outlined text-[18px]">person_add</span>
+          Create Staff Account
+        </button>
+        <a href="{{ url_for('admin.manage_users') }}" class="px-space-lg h-11 rounded-lg border border-outline-variant text-on-surface text-label-lg font-medium flex items-center justify-center hover:bg-surface-container transition-colors">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

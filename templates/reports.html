@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Reports — FixFlow Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full px-gutter py-space-xl flex flex-col gap-space-xl">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+    <div>
+      <span class="text-label-sm uppercase tracking-wider text-secondary font-semibold">Administrator Console</span>
+      <h1 class="text-headline-lg font-bold text-on-surface tracking-tight">Maintenance Reports</h1>
+    </div>
+  </div>
+
+  <!-- Filter Form -->
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+    <form method="GET" action="{{ url_for('admin.reports') }}" class="flex flex-wrap items-end gap-space-md">
+      <div>
+        <label class="block text-label-md text-on-surface mb-1">From Date</label>
+        <input type="date" name="date_from" value="{{ date_from }}"
+               class="px-space-sm py-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md focus:outline-none focus:ring-2 focus:ring-primary"/>
+      </div>
+      <div>
+        <label class="block text-label-md text-on-surface mb-1">To Date</label>
+        <input type="date" name="date_to" value="{{ date_to }}"
+               class="px-space-sm py-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md focus:outline-none focus:ring-2 focus:ring-primary"/>
+      </div>
+      <div>
+        <label class="block text-label-md text-on-surface mb-1">Category</label>
+        <select name="category" class="px-space-sm py-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if category_filter==cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex gap-space-sm">
+        <button type="submit" class="px-space-lg py-space-sm rounded-lg bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">Generate</button>
+        <a href="{{ url_for('admin.export_csv', date_from=date_from, date_to=date_to, category=category_filter) }}"
+           class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded-lg border border-outline-variant text-on-surface text-label-md hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[18px]">download</span> Export CSV
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-space-md">
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg text-center">
+      <span class="material-symbols-outlined text-[32px] text-secondary mb-2 block">inventory_2</span>
+      <span class="text-display font-bold text-on-surface">{{ total }}</span>
+      <p class="text-label-sm text-on-surface-variant mt-1">Total Complaints</p>
+    </div>
+    {% if avg_resolution_hours is not none %}
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg text-center">
+      <span class="material-symbols-outlined text-[32px] text-secondary mb-2 block">schedule</span>
+      <span class="text-display font-bold text-on-surface">{{ avg_resolution_hours }}h</span>
+      <p class="text-label-sm text-on-surface-variant mt-1">Avg Resolution Time</p>
+    </div>
+    {% endif %}
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg text-center">
+      <span class="material-symbols-outlined text-[32px] text-primary mb-2 block">task_alt</span>
+      <span class="text-display font-bold text-primary">{{ status_summary.get('Resolved', 0) + status_summary.get('Closed', 0) }}</span>
+      <p class="text-label-sm text-on-surface-variant mt-1">Resolved / Closed</p>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg text-center">
+      <span class="material-symbols-outlined text-[32px] text-error mb-2 block">priority_high</span>
+      <span class="text-display font-bold text-error">{{ prio_summary.get('High', 0) }}</span>
+      <p class="text-label-sm text-on-surface-variant mt-1">High Priority</p>
+    </div>
+  </div>
+
+  <!-- Detail Tables -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
+
+    <!-- Status Summary -->
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <div class="p-space-lg border-b border-outline-variant">
+        <h3 class="text-headline-sm font-semibold text-on-surface">By Status</h3>
+      </div>
+      <table class="w-full text-body-sm">
+        <tbody class="divide-y divide-outline-variant">
+          {% for s, count in status_summary.items() %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-space-lg py-space-sm">
+              <span class="status-{{ s.lower().replace(' ','-') }} px-2 py-0.5 rounded-full text-label-sm font-medium">{{ s }}</span>
+            </td>
+            <td class="px-space-sm py-space-sm text-right font-bold text-on-surface">{{ count }}</td>
+            <td class="px-space-md py-space-sm w-32">
+              <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+                <div class="bg-primary h-full rounded-full" style="width: {{ (count/total*100)|int if total else 0 }}%"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Priority Summary -->
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <div class="p-space-lg border-b border-outline-variant">
+        <h3 class="text-headline-sm font-semibold text-on-surface">By Priority</h3>
+      </div>
+      <table class="w-full text-body-sm">
+        <tbody class="divide-y divide-outline-variant">
+          {% for p, count in prio_summary.items() %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-space-lg py-space-sm">
+              {% set pclass = 'priority-high' if p=='High' else ('priority-medium' if p=='Medium' else 'priority-low') %}
+              <span class="{{ pclass }} px-2 py-0.5 rounded-full text-label-sm font-medium">{{ p }}</span>
+            </td>
+            <td class="px-space-sm py-space-sm text-right font-bold text-on-surface">{{ count }}</td>
+            <td class="px-space-md py-space-sm w-32">
+              <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+                <div class="{% if p=='High' %}bg-error{% elif p=='Medium' %}bg-amber-500{% else %}bg-slate-400{% endif %} h-full rounded-full"
+                     style="width: {{ (count/total*100)|int if total else 0 }}%"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Category Summary -->
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <div class="p-space-lg border-b border-outline-variant">
+        <h3 class="text-headline-sm font-semibold text-on-surface">By Category</h3>
+      </div>
+      <table class="w-full text-body-sm">
+        <tbody class="divide-y divide-outline-variant">
+          {% for cat, count in cat_summary.items() if count > 0 %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-space-lg py-space-sm text-on-surface">{{ cat }}</td>
+            <td class="px-space-sm py-space-sm text-right font-bold text-on-surface">{{ count }}</td>
+            <td class="px-space-md py-space-sm w-32">
+              <div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+                <div class="bg-secondary h-full rounded-full" style="width: {{ (count/total*100)|int if total else 0 }}%"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Staff Summary -->
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <div class="p-space-lg border-b border-outline-variant">
+        <h3 class="text-headline-sm font-semibold text-on-surface">By Staff Member</h3>
+      </div>
+      <table class="w-full text-body-sm">
+        <tbody class="divide-y divide-outline-variant">
+          {% for staff_name, count in staff_summary.items() %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-space-lg py-space-sm">
+              <div class="flex items-center gap-space-sm">
+                <div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-label-sm font-bold">{{ staff_name[0].upper() }}</div>
+                <span class="text-on-surface">{{ staff_name }}</span>
+              </div>
+            </td>
+            <td class="px-space-sm py-space-sm text-right font-bold text-on-surface">{{ count }}</td>
+          </tr>
+          {% else %}
+          <tr><td class="px-space-lg py-space-sm text-on-surface-variant" colspan="2">No staff data available.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — FixFlow{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full px-gutter py-space-xl flex flex-col gap-space-xl">
+
+  <!-- Greeting Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+    <div>
+      <span class="text-label-sm uppercase tracking-wider text-secondary font-semibold">Campus Stewardship Operations</span>
+      <h1 class="text-headline-lg font-bold text-on-surface tracking-tight mt-0.5">Good day, {{ current_user.full_name.split()[0] }}</h1>
+      <p class="text-body-md text-on-surface-variant">Here's the latest on your campus maintenance requests.</p>
+    </div>
+    <div class="flex items-center gap-space-sm self-start md:self-auto bg-surface-container-lowest px-space-md py-space-sm rounded-full shadow-sm">
+      <span class="material-symbols-outlined text-secondary text-[20px]">location_on</span>
+      <span class="text-label-md text-on-surface">Main Campus</span>
+      <span class="inline-flex items-center gap-1.5 ml-space-xs pl-space-sm bg-surface-container-high py-0.5 px-2.5 rounded-full">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        <span class="text-label-sm text-on-surface-variant font-medium">Ops Active</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Hero CTA Banner -->
+  <div class="relative overflow-hidden rounded-xl bg-primary-container text-on-primary shadow-sm p-space-lg md:p-space-xl">
+    <svg class="absolute right-0 bottom-0 top-0 h-full w-2/5 max-w-[460px] pointer-events-none opacity-15" fill="none" stroke="currentColor" viewBox="0 0 400 300">
+      <path d="M20 280 V60 H180 V280" stroke-dasharray="4 4" stroke-width="1.5"/>
+      <path d="M180 120 H340 V280" stroke-width="1.5"/>
+      <circle cx="100" cy="185" fill="currentColor" r="4"/>
+    </svg>
+    <div class="relative z-10 max-w-2xl flex flex-col gap-space-md">
+      <div class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-on-primary/10 text-on-primary-container w-fit">
+        <span class="material-symbols-outlined text-[16px]">verified</span>
+        <span class="text-label-sm tracking-wide">Rapid Campus Dispatch Service</span>
+      </div>
+      <h2 class="text-display text-on-primary tracking-tight leading-tight">Something needs fixing?</h2>
+      <p class="text-body-lg text-on-primary-container max-w-xl">Report an issue with a classroom, facility, or campus equipment in under 2 minutes.</p>
+      <div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+        <a href="{{ url_for('user.new_complaint') }}" class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-lg bg-surface-container-lowest text-primary text-label-lg shadow-sm hover:bg-surface-bright transition-all active:scale-[0.98]">
+          <span class="material-symbols-outlined text-[20px]">add_circle</span>
+          Submit a Maintenance Request
+        </a>
+        <a href="{{ url_for('user.my_complaints') }}" class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded-lg text-on-primary hover:bg-on-primary/10 text-label-lg transition-colors">
+          <span class="material-symbols-outlined text-[18px]">manage_search</span>
+          Track Existing Issue
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Strip -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-space-md">
+    {% set stats = [
+      ('All Requests', total, 'inventory_2', 'text-secondary', '100%', 'bg-secondary'),
+      ('Pending', pending, '', 'text-error', (pending/total*100)|int ~ '%' if total else '0%', 'bg-error'),
+      ('In Progress', in_progress, 'construction', 'text-secondary', (in_progress/total*100)|int ~ '%' if total else '0%', 'bg-secondary'),
+      ('Resolved', resolved, 'task_alt', 'text-primary', (resolved/total*100)|int ~ '%' if total else '0%', 'bg-primary'),
+    ] %}
+    {% for label, count, icon, color, pct, bar in stats %}
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="text-label-sm text-on-surface-variant font-medium">{{ label }}</span>
+        {% if icon %}<span class="material-symbols-outlined {{ color }} text-[20px]">{{ icon }}</span>
+        {% else %}<span class="w-2.5 h-2.5 rounded-full bg-error"></span>{% endif %}
+      </div>
+      <div class="mt-space-md flex items-baseline gap-2">
+        <span class="text-display font-bold text-on-surface leading-none">{{ count }}</span>
+        <span class="text-label-sm {{ color }} font-medium">{{ label }}</span>
+      </div>
+      <div class="w-full bg-surface-container-high h-1 rounded-full mt-space-sm overflow-hidden">
+        <div class="{{ bar }} h-full rounded-full" style="width: {{ pct }}"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Recent Requests + Side Panel -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+    <!-- Left: Recent Requests -->
+    <div class="lg:col-span-8 flex flex-col gap-space-md">
+      <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+        <div class="flex items-center gap-space-sm">
+          <span class="material-symbols-outlined text-primary text-[24px]">list_alt</span>
+          <h3 class="text-headline-md text-on-surface">Your Recent Requests</h3>
+        </div>
+        <a href="{{ url_for('user.my_complaints') }}" class="text-label-sm text-secondary hover:text-primary transition-colors font-medium flex items-center gap-1">
+          View all <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </a>
+      </div>
+
+      <div class="flex flex-col gap-space-sm">
+        {% if recent %}
+          {% for c in recent %}
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+              <div class="flex flex-wrap items-center gap-space-sm">
+                <span class="text-label-sm font-bold tracking-tight text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">{{ c.complaint_id }}</span>
+                {% set pclass = 'priority-high' if c.priority=='High' else ('priority-medium' if c.priority=='Medium' else 'priority-low') %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm {{ pclass }} font-medium">{{ c.priority }} Priority</span>
+                {% set sclass = 'status-' + c.status.lower().replace(' ', '-') %}
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-label-sm {{ sclass }} font-medium">
+                  {% if c.status == 'In Progress' %}<span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping"></span>{% endif %}
+                  {{ c.status }}
+                </span>
+              </div>
+              <span class="text-label-sm text-on-surface-variant">{{ c.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+            <div class="mt-space-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+              <div class="space-y-1">
+                <h4 class="text-headline-sm font-semibold text-on-surface">{{ c.title }}</h4>
+                <div class="flex flex-wrap items-center gap-x-space-md gap-y-1 text-on-surface-variant text-body-sm">
+                  <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">apartment</span>
+                    {{ c.building }}{% if c.floor %}, Floor {{ c.floor }}{% endif %}{% if c.room_number %}, Room {{ c.room_number }}{% endif %}
+                  </span>
+                  {% if c.assignee %}
+                  <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">engineering</span>
+                    Assigned: <strong class="font-medium text-on-surface">{{ c.assignee.full_name }}</strong>
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+              <a class="self-end md:self-center inline-flex items-center gap-1 text-label-md text-primary font-semibold hover:gap-1.5 transition-all" href="{{ url_for('user.complaint_detail', complaint_id=c.id) }}">
+                View Details <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center">
+            <span class="material-symbols-outlined text-[48px] text-outline mx-auto block mb-4">inbox</span>
+            <h4 class="text-headline-sm text-on-surface font-semibold">No complaints yet</h4>
+            <p class="text-body-md text-on-surface-variant mt-1 mb-4">Submit your first maintenance request to get started.</p>
+            <a href="{{ url_for('user.new_complaint') }}" class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-lg bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">
+              <span class="material-symbols-outlined text-[18px]">add_circle</span> Submit Request
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Quick Notice -->
+    <div class="lg:col-span-4 flex flex-col gap-space-md">
+      <!-- Emergency notice -->
+      <div class="bg-error-container/40 p-space-md rounded-xl flex items-start gap-space-sm">
+        <span class="material-symbols-outlined text-error text-[24px] mt-0.5">emergency</span>
+        <div class="flex flex-col gap-1">
+          <h5 class="text-headline-sm text-error font-bold leading-tight">Immediate Hazards?</h5>
+          <p class="text-body-sm text-on-surface-variant leading-relaxed">For sparking wiring, structural failure, or major flooding, do not submit a web ticket.</p>
+          <div class="mt-space-xs inline-flex items-center gap-2 text-error font-bold text-label-md">
+            <span class="material-symbols-outlined text-[18px]">call</span>
+            Campus Security: Ext. 4444
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick submit CTA -->
+      <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+        <h4 class="text-headline-sm text-on-surface font-semibold mb-space-sm">Quick Submit</h4>
+        <p class="text-body-sm text-on-surface-variant mb-space-md">Have a maintenance issue? Submit it in 2 minutes.</p>
+        <a href="{{ url_for('user.new_complaint') }}" class="w-full flex items-center justify-center gap-space-xs px-space-lg py-space-sm rounded-lg bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          New Request
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

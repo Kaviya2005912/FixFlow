@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Sign In — FixFlow{% endblock %}
+
+{% block content %}
+<main class="w-full bg-surface min-h-screen flex items-center justify-center p-gutter">
+  <div class="flex flex-col w-full max-w-7xl mx-auto py-space-xl px-gutter">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center min-h-[780px]">
+
+      <!-- Left Brand Panel -->
+      <div class="lg:col-span-6 flex flex-col justify-between h-full pr-0 lg:pr-space-xl space-y-space-xl">
+        <div class="space-y-space-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center shadow-sm">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                <circle cx="14" cy="34" fill="#a6f4b5" r="5" stroke="#a6f4b5" stroke-width="2"/>
+                <path d="M17 31 C 24 24, 24 18, 33 14" stroke="#ffffff" stroke-linecap="round" stroke-width="4.5"/>
+                <path d="M30 11 L36 17 M36 11 L30 17" stroke="#ffffff" stroke-linecap="round" stroke-width="4"/>
+              </svg>
+            </div>
+            <span class="text-display font-bold text-on-surface tracking-tight">Fix<span class="text-primary">Flow</span></span>
+          </div>
+          <div class="space-y-space-sm pt-space-xs">
+            <h1 class="text-headline-lg font-bold text-on-surface tracking-tight">A better way to keep campus running.</h1>
+            <p class="text-body-lg text-on-surface-variant max-w-lg leading-relaxed">Report facility issues, follow every update, and help create a safe, well-maintained campus experience.</p>
+          </div>
+        </div>
+
+        <!-- Campus Illustration Card -->
+        <div class="relative w-full rounded-2xl bg-surface-container-low p-6 overflow-hidden shadow-sm">
+          <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-secondary-container/30 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+              <span class="text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Active Dispatch Matrix</span>
+            </div>
+            <span class="text-label-sm px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-medium">Zone 4 Quad</span>
+          </div>
+          <svg class="w-full h-44" fill="none" viewBox="0 0 460 160" xmlns="http://www.w3.org/2000/svg">
+            <rect fill="#E6F1E7" height="70" rx="4" width="440" x="10" y="85"/>
+            <line stroke="#166534" stroke-width="2.5" x1="10" x2="450" y1="85" y2="85"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="36" y="95"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="80" y="95"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="124" y="95"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="168" y="95"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="212" y="95"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="256" y="95"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="300" y="95"/>
+            <rect fill="#DBE5DC" height="60" rx="1" width="14" x="344" y="95"/>
+            <path d="M50 95 Q 65 72 80 95" fill="none" stroke="#166534" stroke-width="2"/>
+            <path d="M94 95 Q 109 72 124 95" fill="none" stroke="#166534" stroke-width="2"/>
+            <path d="M138 95 Q 153 72 168 95" fill="none" stroke="#166534" stroke-width="2"/>
+            <path d="M226 95 Q 241 72 256 95" fill="none" stroke="#166534" stroke-width="2"/>
+            <line stroke="#14532D" stroke-width="3" x1="380" x2="380" y1="20" y2="155"/>
+            <path d="M380 26 C 362 26 348 34 346 45" fill="none" stroke="#14532D" stroke-width="3"/>
+            <path d="M342 45 L352 45 L350 49 L344 49 Z" fill="#14532D"/>
+            <polygon fill="#B1F2BE" opacity="0.35" points="340,50 354,50 366,110 328,110"/>
+            <circle cx="316" cy="68" fill="#14532D" r="9"/>
+            <path d="M316 78 C308 78 304 88 303 104 L330 104 C328 88 324 78 316 78 Z" fill="#166534"/>
+            <ellipse cx="430" cy="145" fill="#347047" opacity="0.6" rx="22" ry="14"/>
+            <ellipse cx="20" cy="147" fill="#347047" opacity="0.6" rx="18" ry="10"/>
+          </svg>
+          <div class="mt-3 flex items-center justify-between text-on-surface-variant text-label-sm">
+            <span>Stewardship Sector: North Campus</span>
+            <span class="font-medium text-primary">Status: Operational</span>
+          </div>
+        </div>
+
+        <!-- Feature Bullets -->
+        <div class="space-y-space-md">
+          <div class="flex items-start gap-3.5">
+            <div class="mt-0.5 w-7 h-7 rounded-lg bg-secondary-container/50 flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined text-[18px]">near_me</span>
+            </div>
+            <div>
+              <p class="text-body-md text-on-surface font-medium leading-tight">Report in under 2 minutes with guided location tagging</p>
+              <p class="text-body-sm text-on-surface-variant">Instant room-level positioning on campus.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3.5">
+            <div class="mt-0.5 w-7 h-7 rounded-lg bg-secondary-container/50 flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined text-[18px]">pace</span>
+            </div>
+            <div>
+              <p class="text-body-md text-on-surface font-medium leading-tight">Live transparent resolution timeline with technician updates</p>
+              <p class="text-body-sm text-on-surface-variant">Track status from intake to completed inspection.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3.5">
+            <div class="mt-0.5 w-7 h-7 rounded-lg bg-secondary-container/50 flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined text-[18px]">hub</span>
+            </div>
+            <div>
+              <p class="text-body-md text-on-surface font-medium leading-tight">Direct coordination across campus maintenance teams</p>
+              <p class="text-body-sm text-on-surface-variant">Synchronized field communications.</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-body-md text-secondary italic tracking-wide">"Every issue has a path to resolution."</p>
+      </div>
+
+      <!-- Right Auth Card -->
+      <div class="lg:col-span-6 flex items-center justify-center w-full">
+        <div class="w-full max-w-[460px] bg-surface-container-lowest rounded-2xl shadow-xl shadow-surface-variant/40 p-8 sm:p-9">
+          <div class="space-y-space-sm mb-7">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container/60 text-on-secondary-container text-label-sm font-semibold mb-1">
+              <span class="material-symbols-outlined text-[16px]">verified_user</span>
+              <span>Campus Access Portal</span>
+            </div>
+            <h2 class="text-headline-md font-semibold text-on-surface tracking-tight">Sign In to FixFlow</h2>
+            <p class="text-body-sm text-on-surface-variant">Enter your credentials to access your campus workspace.</p>
+          </div>
+
+          <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-5" id="login-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <!-- Email -->
+            <div class="space-y-1.5">
+              <label class="block text-label-md text-on-surface font-semibold" for="email">Email Address <span class="text-error">*</span></label>
+              <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-[18px] text-outline pointer-events-none">alternate_email</span>
+                <input class="w-full h-11 pl-10 pr-3.5 rounded-lg bg-surface-container-lowest text-on-surface text-body-md placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/30 border border-outline-variant focus:border-primary shadow-sm transition-all" id="email" name="email" placeholder="your.email@institution.edu" required type="email"/>
+              </div>
+            </div>
+            <!-- Password -->
+            <div class="space-y-1.5">
+              <label class="block text-label-md text-on-surface font-semibold" for="password">Password <span class="text-error">*</span></label>
+              <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-[18px] text-outline pointer-events-none">lock</span>
+                <input class="w-full h-11 pl-10 pr-11 rounded-lg bg-surface-container-lowest text-on-surface text-body-md placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/30 border border-outline-variant focus:border-primary shadow-sm transition-all" id="password" name="password" placeholder="Enter your password" required type="password"/>
+                <button type="button" onclick="togglePwd()" class="absolute right-3 text-outline hover:text-on-surface transition-colors" aria-label="Toggle visibility">
+                  <span class="material-symbols-outlined text-[20px]" id="eye-icon">visibility</span>
+                </button>
+              </div>
+            </div>
+            <!-- Remember me -->
+            <div class="flex items-center justify-between pt-1">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" name="remember" class="w-4 h-4 rounded accent-primary cursor-pointer"/>
+                <span class="text-body-sm text-on-surface">Remember me</span>
+              </label>
+            </div>
+            <!-- Submit -->
+            <div class="pt-2">
+              <button class="w-full h-12 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-label-lg font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all" type="submit">
+                <span>Sign In to Workspace</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Info box -->
+          <div class="mt-6 p-3.5 rounded-xl bg-surface-container-low flex gap-3 items-start">
+            <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">info</span>
+            <p class="text-body-sm text-on-surface-variant leading-normal">
+              Access level is automatically assigned based on your account role (Student/Faculty, Maintenance Staff, or Administrator).
+            </p>
+          </div>
+          <!-- Register link -->
+          <div class="mt-6 pt-5 border-t border-outline-variant text-center">
+            <p class="text-body-sm text-on-surface-variant">
+              Don't have an account?
+              <a class="font-semibold text-primary hover:text-primary-container hover:underline ml-1" href="{{ url_for('auth.register') }}">Register as Student / Faculty</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+function togglePwd() {
+  const inp = document.getElementById('password');
+  const icon = document.getElementById('eye-icon');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  icon.textContent = inp.type === 'password' ? 'visibility' : 'visibility_off';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}403 Forbidden — FixFlow{% endblock %}
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-gutter">
+  <div class="text-center max-w-md">
+    <span class="material-symbols-outlined text-[72px] text-error mb-4 block">block</span>
+    <h1 class="text-display font-bold text-on-surface mb-space-sm">403</h1>
+    <h2 class="text-headline-md font-semibold text-on-surface mb-space-md">Access Denied</h2>
+    <p class="text-body-md text-on-surface-variant mb-space-xl">You don't have permission to access this resource.</p>
+    <a href="{{ url_for('index') }}" class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-lg bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">
+      <span class="material-symbols-outlined text-[18px]">home</span> Go Home
+    </a>
+  </div>
+</div>
+{% endblock %}

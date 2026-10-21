@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Staff Dashboard — FixFlow{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full px-gutter py-space-xl flex flex-col gap-space-xl">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+    <div>
+      <span class="text-label-sm uppercase tracking-wider text-secondary font-semibold">Maintenance Crew Portal</span>
+      <h1 class="text-headline-lg font-bold text-on-surface tracking-tight mt-0.5">Welcome, {{ current_user.full_name.split()[0] }}</h1>
+      <p class="text-body-md text-on-surface-variant">Your assigned maintenance tasks and work queue.</p>
+    </div>
+    <a href="{{ url_for('staff.assignments') }}" class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-xl bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">
+      <span class="material-symbols-outlined text-[18px]">list_alt</span> View All Assignments
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-space-md">
+    {% for label, val, icon, col in [
+      ('Assigned', assigned, 'assignment', 'text-secondary'),
+      ('In Progress', in_progress, 'construction', 'text-teal-700'),
+      ('Completed', completed, 'task_alt', 'text-primary'),
+      ('High Priority', high_prio, 'priority_high', 'text-error'),
+    ] %}
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-xs">
+      <div class="flex items-center justify-between">
+        <span class="text-label-sm text-on-surface-variant">{{ label }}</span>
+        <span class="material-symbols-outlined {{ col }} text-[20px]">{{ icon }}</span>
+      </div>
+      <span class="text-display font-bold text-on-surface leading-none">{{ val }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Recent Assignments -->
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <div class="p-space-lg border-b border-outline-variant flex items-center justify-between">
+      <h3 class="text-headline-sm font-semibold text-on-surface flex items-center gap-space-sm">
+        <span class="material-symbols-outlined text-secondary text-[20px]">assignment</span>
+        Recent Assignments
+      </h3>
+      <a href="{{ url_for('staff.assignments') }}" class="text-label-sm text-secondary hover:text-primary transition-colors font-medium flex items-center gap-1">
+        View all <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </a>
+    </div>
+
+    <div class="flex flex-col divide-y divide-outline-variant">
+      {% if recent %}
+        {% for c in recent %}
+        <div class="p-space-md hover:bg-surface-container-low transition-colors">
+          <div class="flex flex-wrap items-center gap-space-sm mb-space-xs">
+            <span class="text-label-sm font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded font-mono">{{ c.complaint_id }}</span>
+            {% set pclass = 'priority-high' if c.priority=='High' else ('priority-medium' if c.priority=='Medium' else 'priority-low') %}
+            <span class="inline-flex px-2 py-0.5 rounded-full text-label-sm {{ pclass }} font-medium">{{ c.priority }}</span>
+            {% set sclass = 'status-' + c.status.lower().replace(' ', '-') %}
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-label-sm {{ sclass }} font-medium">
+              {% if c.status == 'In Progress' %}<span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping"></span>{% endif %}
+              {{ c.status }}
+            </span>
+          </div>
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+            <div>
+              <h4 class="text-headline-sm font-semibold text-on-surface">{{ c.title }}</h4>
+              <p class="text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+                <span class="material-symbols-outlined text-[14px]">apartment</span>
+                {{ c.building }}{% if c.floor %}, Fl. {{ c.floor }}{% endif %}{% if c.room_number %}, {{ c.room_number }}{% endif %}
+              </p>
+            </div>
+            <a href="{{ url_for('staff.assigned_complaint', complaint_id=c.id) }}"
+               class="self-end md:self-center inline-flex items-center gap-1 text-label-md text-primary font-semibold hover:gap-1.5 transition-all whitespace-nowrap">
+              View & Update <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="p-space-xl text-center">
+          <span class="material-symbols-outlined text-[48px] text-outline mx-auto block mb-4">assignment_turned_in</span>
+          <h4 class="text-headline-sm font-semibold text-on-surface">No assignments yet</h4>
+          <p class="text-body-md text-on-surface-variant mt-1">You'll see complaints here once an administrator assigns them to you.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

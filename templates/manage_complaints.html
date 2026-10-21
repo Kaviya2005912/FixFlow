@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Manage Complaints — FixFlow Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full px-gutter py-space-xl flex flex-col gap-space-lg">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+    <div>
+      <span class="text-label-sm uppercase tracking-wider text-secondary font-semibold">Administrator Console</span>
+      <h1 class="text-headline-lg font-bold text-on-surface tracking-tight">Manage Complaints</h1>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="inline-flex items-center gap-space-xs text-label-md text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+    <form method="GET" action="{{ url_for('admin.manage_complaints') }}" class="flex flex-col gap-space-md">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+        <!-- Search -->
+        <div class="sm:col-span-2 relative">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant pointer-events-none">search</span>
+          <input class="w-full pl-10 pr-3 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                 name="q" placeholder="Search by title, description..." type="text" value="{{ q }}"/>
+        </div>
+        <!-- Status -->
+        <select name="status" class="px-space-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="">All Statuses</option>
+          {% for s in statuses %}
+          <option value="{{ s }}" {% if status_filter==s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        <!-- Priority -->
+        <select name="priority" class="px-space-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="">All Priorities</option>
+          {% for p in priorities %}
+          <option value="{{ p }}" {% if priority_filter==p %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+        <!-- Category -->
+        <select name="category" class="px-space-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if category_filter==cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+        <!-- Staff filter -->
+        <select name="assigned" class="px-space-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="">All Assignments</option>
+          <option value="unassigned" {% if assigned_filter=='unassigned' %}selected{% endif %}>Unassigned</option>
+          {% for s in staff_list %}
+          <option value="{{ s.id }}" {% if assigned_filter==s.id|string %}selected{% endif %}>{{ s.full_name }}</option>
+          {% endfor %}
+        </select>
+        <!-- Date Range -->
+        <input type="date" name="date_from" value="{{ date_from }}"
+               class="px-space-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+        <input type="date" name="date_to" value="{{ date_to }}"
+               class="px-space-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+      </div>
+      <div class="flex items-center gap-space-sm">
+        <button type="submit" class="px-space-lg py-space-sm rounded-lg bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">
+          Apply Filters
+        </button>
+        <a href="{{ url_for('admin.manage_complaints') }}" class="px-space-md py-space-sm rounded-lg border border-outline-variant text-on-surface text-label-md hover:bg-surface-container transition-colors">
+          Clear
+        </a>
+        <a href="{{ url_for('admin.export_csv', status=status_filter, category=category_filter, date_from=date_from, date_to=date_to) }}"
+           class="ml-auto inline-flex items-center gap-space-xs px-space-md py-space-sm rounded-lg border border-outline-variant text-on-surface text-label-md hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[18px]">download</span> Export CSV
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-body-sm">
+        <thead class="bg-surface-container-low border-b border-outline-variant">
+          <tr>
+            <th class="text-left px-space-lg py-space-sm text-label-md text-on-surface-variant font-semibold">ID</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold">Title</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold hidden md:table-cell">Submitted By</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold hidden lg:table-cell">Location</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold">Priority</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold">Status</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold hidden lg:table-cell">Assigned</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold hidden md:table-cell">Date</th>
+            <th class="px-space-md py-space-sm"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant">
+          {% for c in complaints.items %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-space-lg py-space-sm text-label-sm text-on-surface-variant font-mono whitespace-nowrap">{{ c.complaint_id }}</td>
+            <td class="px-space-sm py-space-sm text-on-surface font-medium max-w-[200px] truncate">{{ c.title }}</td>
+            <td class="px-space-sm py-space-sm text-on-surface-variant hidden md:table-cell">{{ c.submitter.full_name }}</td>
+            <td class="px-space-sm py-space-sm text-on-surface-variant hidden lg:table-cell whitespace-nowrap">{{ c.building }}{% if c.floor %}, Fl {{ c.floor }}{% endif %}</td>
+            <td class="px-space-sm py-space-sm">
+              {% set pclass = 'priority-high' if c.priority=='High' else ('priority-medium' if c.priority=='Medium' else 'priority-low') %}
+              <span class="inline-flex px-2 py-0.5 rounded-full text-label-sm {{ pclass }} font-medium">{{ c.priority }}</span>
+            </td>
+            <td class="px-space-sm py-space-sm">
+              {% set sclass = 'status-' + c.status.lower().replace(' ', '-') %}
+              <span class="inline-flex px-2 py-0.5 rounded-full text-label-sm {{ sclass }} font-medium whitespace-nowrap">{{ c.status }}</span>
+            </td>
+            <td class="px-space-sm py-space-sm text-on-surface-variant hidden lg:table-cell">{{ c.assignee.full_name if c.assignee else '—' }}</td>
+            <td class="px-space-sm py-space-sm text-on-surface-variant hidden md:table-cell whitespace-nowrap">{{ c.created_at.strftime('%b %d') }}</td>
+            <td class="px-space-md py-space-sm">
+              <a href="{{ url_for('admin.manage_complaint', complaint_id=c.id) }}" class="inline-flex items-center gap-1 text-label-sm text-primary font-semibold hover:underline whitespace-nowrap">
+                Manage <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" class="px-space-lg py-space-xl text-center text-on-surface-variant text-body-md">No complaints found matching your filters.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if complaints.pages > 1 %}
+  <div class="flex items-center justify-center gap-space-sm">
+    {% if complaints.has_prev %}
+    <a href="{{ url_for('admin.manage_complaints', page=complaints.prev_num, status=status_filter, category=category_filter, priority=priority_filter, q=q) }}"
+       class="px-space-md py-space-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md">← Prev</a>
+    {% endif %}
+    <span class="text-body-sm text-on-surface-variant">Page {{ complaints.page }} of {{ complaints.pages }} ({{ complaints.total }} total)</span>
+    {% if complaints.has_next %}
+    <a href="{{ url_for('admin.manage_complaints', page=complaints.next_num, status=status_filter, category=category_filter, priority=priority_filter, q=q) }}"
+       class="px-space-md py-space-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

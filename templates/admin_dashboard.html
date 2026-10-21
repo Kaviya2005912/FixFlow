@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — FixFlow{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full px-gutter py-space-xl flex flex-col gap-space-xl">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+    <div>
+      <span class="text-label-sm uppercase tracking-wider text-secondary font-semibold">Administrator Console</span>
+      <h1 class="text-headline-lg font-bold text-on-surface tracking-tight mt-0.5">Operations Dashboard</h1>
+      <p class="text-body-md text-on-surface-variant">Complete overview of campus maintenance activity.</p>
+    </div>
+    <div class="flex items-center gap-space-sm">
+      <a href="{{ url_for('admin.manage_complaints') }}" class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-xl bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">
+        <span class="material-symbols-outlined text-[18px]">list_alt</span> Manage Complaints
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-space-md">
+    {% for label, val, icon, col, bg in [
+      ('Total', total, 'inventory_2', 'text-on-surface', 'bg-surface-container'),
+      ('Submitted', submitted, 'inbox', 'text-slate-600', 'bg-slate-100'),
+      ('Pending', pending, 'hourglass_top', 'text-error', 'bg-error-container'),
+      ('In Progress', in_progress, 'construction', 'text-teal-700', 'bg-teal-50'),
+      ('Resolved', resolved, 'task_alt', 'text-primary', 'bg-secondary-container'),
+      ('High Priority Open', high_open, 'priority_high', 'text-orange-700', 'bg-orange-50'),
+    ] %}
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-xs">
+      <div class="flex items-center justify-between">
+        <span class="text-label-sm text-on-surface-variant">{{ label }}</span>
+        <div class="w-8 h-8 rounded-lg {{ bg }} flex items-center justify-center {{ col }}">
+          <span class="material-symbols-outlined text-[18px]">{{ icon }}</span>
+        </div>
+      </div>
+      <span class="text-display font-bold text-on-surface leading-none">{{ val }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+      <h3 class="text-headline-sm font-semibold text-on-surface mb-space-md">Complaints by Status</h3>
+      <canvas id="statusChart" height="220"></canvas>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+      <h3 class="text-headline-sm font-semibold text-on-surface mb-space-md">Complaints by Category</h3>
+      <canvas id="categoryChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Recent Complaints Table -->
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <div class="p-space-lg flex items-center justify-between border-b border-outline-variant">
+      <h3 class="text-headline-sm font-semibold text-on-surface flex items-center gap-space-sm">
+        <span class="material-symbols-outlined text-secondary text-[20px]">list_alt</span>
+        Recent Complaints
+      </h3>
+      <a href="{{ url_for('admin.manage_complaints') }}" class="text-label-sm text-secondary hover:text-primary transition-colors font-medium flex items-center gap-1">
+        View all <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-body-sm">
+        <thead class="bg-surface-container-low">
+          <tr>
+            <th class="text-left px-space-lg py-space-sm text-label-md text-on-surface-variant font-semibold">ID</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold">Title</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold hidden md:table-cell">Category</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold">Priority</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold">Status</th>
+            <th class="text-left px-space-sm py-space-sm text-label-md text-on-surface-variant font-semibold hidden lg:table-cell">Assigned</th>
+            <th class="px-space-md py-space-sm"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant">
+          {% for c in recent %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-space-lg py-space-sm text-label-sm text-on-surface-variant font-mono">{{ c.complaint_id }}</td>
+            <td class="px-space-sm py-space-sm text-on-surface font-medium max-w-xs truncate">{{ c.title }}</td>
+            <td class="px-space-sm py-space-sm text-on-surface-variant hidden md:table-cell">{{ c.category }}</td>
+            <td class="px-space-sm py-space-sm">
+              {% set pclass = 'priority-high' if c.priority=='High' else ('priority-medium' if c.priority=='Medium' else 'priority-low') %}
+              <span class="inline-flex px-2 py-0.5 rounded-full text-label-sm {{ pclass }} font-medium">{{ c.priority }}</span>
+            </td>
+            <td class="px-space-sm py-space-sm">
+              {% set sclass = 'status-' + c.status.lower().replace(' ', '-') %}
+              <span class="inline-flex px-2 py-0.5 rounded-full text-label-sm {{ sclass }} font-medium">{{ c.status }}</span>
+            </td>
+            <td class="px-space-sm py-space-sm text-on-surface-variant hidden lg:table-cell">{{ c.assignee.full_name if c.assignee else '—' }}</td>
+            <td class="px-space-md py-space-sm">
+              <a href="{{ url_for('admin.manage_complaint', complaint_id=c.id) }}" class="text-label-sm text-primary font-semibold hover:underline">Manage</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-space-md">
+    {% for label, icon, url in [
+      ('Manage Complaints', 'list_alt', url_for('admin.manage_complaints')),
+      ('Manage Users', 'manage_accounts', url_for('admin.manage_users')),
+      ('Create Staff', 'person_add', url_for('admin.create_staff')),
+      ('Reports & Export', 'bar_chart', url_for('admin.reports')),
+    ] %}
+    <a href="{{ url }}" class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col items-center gap-space-sm hover:bg-surface-container hover:shadow-md transition-all text-center group">
+      <span class="material-symbols-outlined text-[32px] text-secondary group-hover:text-primary transition-colors">{{ icon }}</span>
+      <span class="text-label-lg text-on-surface font-medium">{{ label }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const statusData = {
+  labels: {{ status_counts | map(attribute=0) | list | tojson }},
+  datasets: [{
+    data: {{ status_counts | map(attribute=1) | list | tojson }},
+    backgroundColor: ['#F1F5F9','#EFF6FF','#F3E8FF','#CCFBF1','#DCFCE7','#E2E8F0','#FEF3C7'],
+    borderWidth: 1,
+  }]
+};
+const catData = {
+  labels: {{ cat_counts | map(attribute=0) | list | tojson }},
+  datasets: [{
+    label: 'Complaints',
+    data: {{ cat_counts | map(attribute=1) | list | tojson }},
+    backgroundColor: '#166534',
+    borderRadius: 6,
+  }]
+};
+new Chart(document.getElementById('statusChart'), {
+  type: 'doughnut',
+  data: statusData,
+  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+new Chart(document.getElementById('categoryChart'), {
+  type: 'bar',
+  data: catData,
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+</script>
+{% endblock %}

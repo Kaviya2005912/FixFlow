@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}Submit a Request — FixFlow{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-7xl mx-auto px-margin-mobile md:px-margin py-space-xl">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-space-xs text-label-md text-on-surface-variant mb-space-sm">
+    <a href="{{ url_for('user.dashboard') }}" class="hover:text-primary transition-colors flex items-center gap-1">
+      <span class="material-symbols-outlined text-[16px]">home</span> Home
+    </a>
+    <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+    <span class="text-on-surface font-semibold">Submit a Request</span>
+  </nav>
+
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md border-b-0 pb-space-xs mb-space-xl">
+    <div>
+      <div class="flex items-center gap-space-xs mb-1">
+        <span class="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>
+        <span class="text-label-sm uppercase tracking-wider text-secondary font-bold">Campus Stewardship Dispatch</span>
+      </div>
+      <h1 class="text-headline-lg text-on-surface tracking-tight">Report a Maintenance Issue</h1>
+      <p class="text-body-md text-on-surface-variant mt-1">Tell us what's wrong and where. Required fields are marked <span class="text-error font-medium">*</span>.</p>
+    </div>
+    <div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-xs rounded-xl self-start md:self-auto shadow-sm">
+      <span class="material-symbols-outlined text-secondary text-[20px]">bolt</span>
+      <div>
+        <p class="text-label-sm text-on-surface-variant uppercase tracking-wider leading-none">Response Window</p>
+        <p class="text-label-md text-on-surface font-bold mt-0.5">≤ 2 Hours for High Urgency</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form method="POST" action="{{ url_for('user.new_complaint') }}" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start" id="complaint-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+    <!-- Left Column: Fields -->
+    <div class="lg:col-span-8 flex flex-col gap-space-lg">
+
+      <!-- Section 1: What Needs Attention -->
+      <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <div class="flex items-center justify-between pb-space-md mb-space-lg bg-surface-container-low/40 -mx-space-lg -mt-space-lg p-space-lg rounded-t-xl">
+          <div class="flex items-center gap-space-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-on-primary text-label-md font-bold">1</span>
+            <div>
+              <h2 class="text-headline-sm text-on-surface">What Needs Attention?</h2>
+              <p class="text-body-sm text-on-surface-variant">Classify the issue to route to the correct crew.</p>
+            </div>
+          </div>
+          <span class="text-label-sm px-space-sm py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">Mandatory</span>
+        </div>
+
+        <!-- Title -->
+        <div class="mb-space-lg">
+          <label class="block text-label-lg text-on-surface mb-1.5" for="title">Issue Title <span class="text-error">*</span></label>
+          <div class="relative">
+            <input class="w-full h-11 px-space-md rounded-lg bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary border border-outline-variant focus:border-primary shadow-sm"
+                   id="title" name="title" placeholder="e.g., Ceiling fan not working" required type="text"
+                   value="{{ form_data.get('title', '') if form_data else '' }}"/>
+            <span class="material-symbols-outlined absolute right-3 top-3 text-secondary text-[20px]">edit_note</span>
+          </div>
+        </div>
+
+        <!-- Category Grid -->
+        <div class="mb-space-lg">
+          <label class="block text-label-lg text-on-surface mb-2">Maintenance Category <span class="text-error">*</span></label>
+          <input id="selected-category" name="category" type="hidden" value="{{ form_data.get('category', categories[0]) if form_data else categories[0] }}"/>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-space-sm" id="category-grid">
+            {% set cat_icons = {
+              'Electrical': ('bolt', 'Wiring, fans, power'),
+              'Plumbing & Water Supply': ('water_drop', 'Leaks, drains, taps'),
+              'Classroom Equipment': ('tv_gen', 'Projectors, podiums'),
+              'Furniture': ('chair', 'Desks, seating'),
+              'Laboratory Equipment': ('science', 'Lab tools'),
+              'Cleaning & Sanitation': ('cleaning_services', 'Hygiene, waste'),
+              'Internet & Networking': ('wifi', 'Network, cables'),
+              'Civil Maintenance': ('foundation', 'Walls, floors'),
+              'Other Facilities': ('category', 'Other issues'),
+            } %}
+            {% for cat in categories %}
+            {% set icon_sub = cat_icons.get(cat, ('build', '')) %}
+            <button class="cat-tile flex flex-col items-center justify-center p-space-md rounded-xl text-center transition-all shadow-xs
+              {% if (form_data.get('category') if form_data else categories[0]) == cat %}bg-secondary-container/40 text-primary{% else %}bg-surface-container-low text-on-surface hover:bg-surface-container{% endif %}"
+              data-category="{{ cat }}" type="button">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2
+                {% if (form_data.get('category') if form_data else categories[0]) == cat %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant{% endif %}">
+                <span class="material-symbols-outlined text-[20px]">{{ icon_sub[0] }}</span>
+              </div>
+              <span class="text-label-md font-medium tracking-tight">{{ cat.split('&')[0].strip() }}</span>
+              <span class="text-[10px] text-on-surface-variant/80 mt-0.5">{{ icon_sub[1] }}</span>
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-label-lg text-on-surface mb-1.5" for="description">Issue Description <span class="text-error">*</span></label>
+          <textarea class="w-full px-space-md py-space-sm rounded-lg bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary border border-outline-variant focus:border-primary shadow-sm resize-y min-h-[120px]"
+                    id="description" name="description" placeholder="Describe the problem in detail — what is broken, when it started, how severe it is..." required>{{ form_data.get('description', '') if form_data else '' }}</textarea>
+        </div>
+      </section>
+
+      <!-- Section 2: Location -->
+      <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <div class="flex items-center gap-space-sm pb-space-md mb-space-lg bg-surface-container-low/40 -mx-space-lg -mt-space-lg p-space-lg rounded-t-xl">
+          <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-on-primary text-label-md font-bold">2</span>
+          <div>
+            <h2 class="text-headline-sm text-on-surface">Where Is the Issue?</h2>
+            <p class="text-body-sm text-on-surface-variant">Precise location helps dispatch faster.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-lg">
+          <div class="sm:col-span-2">
+            <label class="block text-label-lg text-on-surface mb-1.5" for="building">Building / Block <span class="text-error">*</span></label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">apartment</span>
+              <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
+                     id="building" name="building" placeholder="e.g., Block B, Main Block, Library" required type="text"
+                     value="{{ form_data.get('building', '') if form_data else '' }}"/>
+            </div>
+          </div>
+          <div>
+            <label class="block text-label-lg text-on-surface mb-1.5" for="floor">Floor</label>
+            <input class="w-full h-11 px-space-md rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
+                   id="floor" name="floor" placeholder="e.g., Ground, 1, 2" type="text"
+                   value="{{ form_data.get('floor', '') if form_data else '' }}"/>
+          </div>
+          <div>
+            <label class="block text-label-lg text-on-surface mb-1.5" for="room_number">Room Number</label>
+            <input class="w-full h-11 px-space-md rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
+                   id="room_number" name="room_number" placeholder="e.g., 204, Lab 3" type="text"
+                   value="{{ form_data.get('room_number', '') if form_data else '' }}"/>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Photo -->
+      <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <div class="flex items-center gap-space-sm pb-space-md mb-space-lg bg-surface-container-low/40 -mx-space-lg -mt-space-lg p-space-lg rounded-t-xl">
+          <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-surface-container-high text-on-surface-variant text-label-md font-bold">3</span>
+          <div>
+            <h2 class="text-headline-sm text-on-surface">Attach a Photo <span class="text-label-sm text-on-surface-variant font-normal">(Optional)</span></h2>
+            <p class="text-body-sm text-on-surface-variant">A photo helps identify the exact problem. Max 5MB.</p>
+          </div>
+        </div>
+        <div class="border-2 border-dashed border-outline-variant rounded-xl p-space-xl text-center hover:border-primary transition-colors cursor-pointer" id="drop-zone" onclick="document.getElementById('image').click()">
+          <span class="material-symbols-outlined text-[40px] text-outline mx-auto block mb-2">add_a_photo</span>
+          <p class="text-body-md text-on-surface font-medium">Click or drag & drop an image</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">PNG, JPG, JPEG, GIF, WEBP · Max 5 MB</p>
+          <input class="hidden" id="image" name="image" type="file" accept=".png,.jpg,.jpeg,.gif,.webp" onchange="previewImage(this)"/>
+        </div>
+        <div id="image-preview-container" class="hidden mt-space-md">
+          <img id="image-preview" class="max-h-48 rounded-xl border border-outline-variant mx-auto object-contain" src="" alt="Preview"/>
+          <button type="button" onclick="clearImage()" class="mt-2 text-label-sm text-error hover:underline flex items-center gap-1 mx-auto">
+            <span class="material-symbols-outlined text-[16px]">delete</span> Remove
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Summary -->
+    <div class="lg:col-span-4 flex flex-col gap-space-md sticky top-20">
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <h3 class="text-headline-sm text-on-surface mb-space-md font-semibold">Submission Summary</h3>
+        <div class="space-y-space-sm text-body-sm">
+          <div class="flex justify-between"><span class="text-on-surface-variant">Status</span><span class="status-submitted px-2 py-0.5 rounded-full text-label-sm font-medium">Submitted</span></div>
+          <div class="flex justify-between"><span class="text-on-surface-variant">Priority</span><span class="priority-medium px-2 py-0.5 rounded-full text-label-sm font-medium">Medium (default)</span></div>
+          <div class="flex justify-between"><span class="text-on-surface-variant">Submitted by</span><span class="text-on-surface font-medium">{{ current_user.full_name }}</span></div>
+        </div>
+        <div class="mt-space-lg pt-space-md border-t border-outline-variant space-y-space-sm">
+          <button type="submit" class="w-full h-12 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-label-lg font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all">
+            <span class="material-symbols-outlined text-[18px]">send</span>
+            Submit Complaint
+          </button>
+          <a href="{{ url_for('user.dashboard') }}" class="w-full h-10 rounded-lg border border-outline-variant text-on-surface text-label-lg font-medium flex items-center justify-center gap-2 hover:bg-surface-container transition-all">
+            Cancel
+          </a>
+        </div>
+      </div>
+      <div class="bg-surface-container-low p-space-md rounded-xl text-body-sm text-on-surface-variant">
+        <span class="material-symbols-outlined text-[16px] text-secondary mr-1 align-middle">info</span>
+        Priority and staff assignment will be done by an administrator.
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+// Category selection
+document.querySelectorAll('.cat-tile').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-tile').forEach(b => {
+      b.classList.remove('bg-secondary-container/40', 'text-primary');
+      b.classList.add('bg-surface-container-low', 'text-on-surface', 'hover:bg-surface-container');
+      b.querySelector('div').classList.remove('bg-primary','text-on-primary');
+      b.querySelector('div').classList.add('bg-surface-container','text-on-surface-variant');
+    });
+    btn.classList.add('bg-secondary-container/40', 'text-primary');
+    btn.classList.remove('bg-surface-container-low', 'text-on-surface');
+    btn.querySelector('div').classList.add('bg-primary','text-on-primary');
+    btn.querySelector('div').classList.remove('bg-surface-container','text-on-surface-variant');
+    document.getElementById('selected-category').value = btn.dataset.category;
+  });
+});
+
+// Image preview
+function previewImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('image-preview').src = e.target.result;
+    document.getElementById('image-preview-container').classList.remove('hidden');
+    document.getElementById('drop-zone').classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+function clearImage() {
+  document.getElementById('image').value = '';
+  document.getElementById('image-preview-container').classList.add('hidden');
+  document.getElementById('drop-zone').classList.remove('hidden');
+}
+
+// Drag and drop
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('border-primary'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('border-primary'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('border-primary');
+  const f = e.dataTransfer.files[0];
+  if (f) {
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    document.getElementById('image').files = dt.files;
+    previewImage(document.getElementById('image'));
+  }
+});
+</script>
+{% endblock %}

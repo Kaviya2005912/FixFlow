@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}My Assignments — FixFlow Staff{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full px-gutter py-space-xl flex flex-col gap-space-lg">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+    <div>
+      <span class="text-label-sm uppercase tracking-wider text-secondary font-semibold">Maintenance Crew Portal</span>
+      <h1 class="text-headline-lg font-bold text-on-surface tracking-tight">My Assignments</h1>
+    </div>
+    <!-- Status filter tabs -->
+    <div class="flex items-center gap-space-xs overflow-x-auto">
+      {% for s in ['', 'Assigned', 'In Progress', 'Resolved', 'Closed'] %}
+      <a href="{{ url_for('staff.assignments', status=s) }}"
+         class="px-space-md py-space-xs rounded-lg text-label-lg whitespace-nowrap transition-colors
+         {% if status_filter == s %}bg-primary text-on-primary{% else %}text-on-surface-variant hover:bg-surface-container hover:text-on-surface{% endif %}">
+        {{ s or 'All' }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-space-sm">
+    {% if complaints.items %}
+      {% for c in complaints.items %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow p-space-md">
+        <div class="flex flex-wrap items-center gap-space-sm mb-space-xs">
+          <span class="text-label-sm font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded font-mono">{{ c.complaint_id }}</span>
+          {% set pclass = 'priority-high' if c.priority=='High' else ('priority-medium' if c.priority=='Medium' else 'priority-low') %}
+          <span class="inline-flex px-2 py-0.5 rounded-full text-label-sm {{ pclass }} font-medium">{{ c.priority }}</span>
+          {% set sclass = 'status-' + c.status.lower().replace(' ', '-') %}
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-label-sm {{ sclass }} font-medium">
+            {% if c.status == 'In Progress' %}<span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping"></span>{% endif %}
+            {{ c.status }}
+          </span>
+          <span class="text-label-sm text-on-surface-variant ml-auto">{{ c.created_at.strftime('%b %d, %Y') }}</span>
+        </div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+          <div>
+            <h4 class="text-headline-sm font-semibold text-on-surface">{{ c.title }}</h4>
+            <p class="text-body-sm text-on-surface-variant flex flex-wrap items-center gap-x-space-md mt-0.5">
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">category</span>{{ c.category }}</span>
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">apartment</span>
+                {{ c.building }}{% if c.floor %}, Fl. {{ c.floor }}{% endif %}{% if c.room_number %}, {{ c.room_number }}{% endif %}
+              </span>
+            </p>
+          </div>
+          <a href="{{ url_for('staff.assigned_complaint', complaint_id=c.id) }}"
+             class="self-end md:self-center inline-flex items-center gap-1 text-label-md text-primary font-semibold hover:gap-1.5 transition-all whitespace-nowrap">
+            View & Update <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl text-center">
+        <span class="material-symbols-outlined text-[48px] text-outline mx-auto block mb-4">assignment_turned_in</span>
+        <h4 class="text-headline-sm font-semibold text-on-surface">No assignments found</h4>
+        <p class="text-body-md text-on-surface-variant mt-1">{{ 'No complaints with this status.' if status_filter else 'You have no assignments yet.' }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if complaints.pages > 1 %}
+  <div class="flex items-center justify-center gap-space-sm">
+    {% if complaints.has_prev %}
+    <a href="{{ url_for('staff.assignments', page=complaints.prev_num, status=status_filter) }}"
+       class="px-space-md py-space-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md">← Prev</a>
+    {% endif %}
+    <span class="text-body-sm text-on-surface-variant">Page {{ complaints.page }} of {{ complaints.pages }}</span>
+    {% if complaints.has_next %}
+    <a href="{{ url_for('staff.assignments', page=complaints.next_num, status=status_filter) }}"
+       class="px-space-md py-space-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

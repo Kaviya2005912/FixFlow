@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Register — FixFlow{% endblock %}
+
+{% block content %}
+<main class="w-full bg-surface min-h-screen flex items-center justify-center p-gutter">
+  <div class="w-full max-w-md mx-auto py-space-xl">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-surface-variant/30 p-8">
+      <!-- Header -->
+      <div class="mb-7">
+        <a href="{{ url_for('auth.login') }}" class="flex items-center gap-space-sm mb-6">
+          <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+              <circle cx="14" cy="34" fill="#a6f4b5" r="5" stroke="#a6f4b5" stroke-width="2"/>
+              <path d="M17 31 C 24 24, 24 18, 33 14" stroke="#ffffff" stroke-linecap="round" stroke-width="4.5"/>
+            </svg>
+          </div>
+          <span class="text-headline-md font-bold text-primary">Fix<span class="text-secondary">Flow</span></span>
+        </a>
+        <h1 class="text-headline-md font-semibold text-on-surface tracking-tight">Create your account</h1>
+        <p class="text-body-sm text-on-surface-variant mt-1">Register as a Student or Faculty member to report maintenance issues.</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.register') }}" class="space-y-5">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <!-- Full Name -->
+        <div class="space-y-1.5">
+          <label class="block text-label-md text-on-surface font-semibold" for="full_name">Full Name <span class="text-error">*</span></label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">person</span>
+            <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                   id="full_name" name="full_name" placeholder="Your full name" required type="text"
+                   value="{{ form_data.get('full_name', '') if form_data else '' }}"/>
+          </div>
+        </div>
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label class="block text-label-md text-on-surface font-semibold" for="email">Email Address <span class="text-error">*</span></label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">alternate_email</span>
+            <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                   id="email" name="email" placeholder="you@institution.edu" required type="email"
+                   value="{{ form_data.get('email', '') if form_data else '' }}"/>
+          </div>
+        </div>
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <label class="block text-label-md text-on-surface font-semibold" for="password">Password <span class="text-error">*</span></label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">lock</span>
+            <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                   id="password" name="password" placeholder="At least 8 characters" required type="password" minlength="8"/>
+          </div>
+          <p class="text-label-sm text-on-surface-variant">Minimum 8 characters.</p>
+        </div>
+        <!-- Confirm Password -->
+        <div class="space-y-1.5">
+          <label class="block text-label-md text-on-surface font-semibold" for="confirm_password">Confirm Password <span class="text-error">*</span></label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-3 text-[18px] text-outline pointer-events-none">lock_reset</span>
+            <input class="w-full h-11 pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                   id="confirm_password" name="confirm_password" placeholder="Re-enter password" required type="password"/>
+          </div>
+        </div>
+        <!-- Submit -->
+        <button class="w-full h-12 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-label-lg font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all mt-2" type="submit">
+          <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+          <span>Create Account</span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-5 border-t border-outline-variant text-center">
+        <p class="text-body-sm text-on-surface-variant">
+          Already have an account?
+          <a class="font-semibold text-primary hover:underline ml-1" href="{{ url_for('auth.login') }}">Sign in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

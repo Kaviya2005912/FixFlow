@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Complaint {{ complaint.complaint_id }} — FixFlow{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto w-full px-gutter py-space-xl">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-space-xs text-label-md text-on-surface-variant mb-space-lg">
+    <a href="{{ url_for('user.dashboard') }}" class="hover:text-primary transition-colors flex items-center gap-1">
+      <span class="material-symbols-outlined text-[16px]">home</span> Home
+    </a>
+    <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+    <a href="{{ url_for('user.my_complaints') }}" class="hover:text-primary transition-colors">My Requests</a>
+    <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+    <span class="text-on-surface font-semibold">{{ complaint.complaint_id }}</span>
+  </nav>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+    <!-- Main Content -->
+    <div class="lg:col-span-8 flex flex-col gap-space-lg">
+
+      <!-- Header Card -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <div class="flex flex-wrap items-center gap-space-sm mb-space-md">
+          <span class="text-label-sm font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">{{ complaint.complaint_id }}</span>
+          {% set pclass = 'priority-high' if complaint.priority=='High' else ('priority-medium' if complaint.priority=='Medium' else 'priority-low') %}
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm {{ pclass }} font-medium">{{ complaint.priority }} Priority</span>
+          {% set sclass = 'status-' + complaint.status.lower().replace(' ', '-') %}
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-label-sm {{ sclass }} font-medium">
+            {% if complaint.status == 'In Progress' %}<span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping"></span>{% endif %}
+            {{ complaint.status }}
+          </span>
+        </div>
+        <h1 class="text-headline-lg font-bold text-on-surface tracking-tight mb-space-sm">{{ complaint.title }}</h1>
+        <p class="text-body-md text-on-surface-variant leading-relaxed">{{ complaint.description }}</p>
+
+        {% if complaint.image_path %}
+        <div class="mt-space-md">
+          <img src="{{ url_for('static', filename='uploads/' + complaint.image_path) }}"
+               alt="Complaint attachment" class="max-h-64 rounded-xl border border-outline-variant object-cover"/>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Status Timeline -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <h3 class="text-headline-sm font-semibold text-on-surface mb-space-md flex items-center gap-space-sm">
+          <span class="material-symbols-outlined text-secondary text-[20px]">timeline</span>
+          Status Timeline
+        </h3>
+        <div class="relative">
+          <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-outline-variant"></div>
+          <div class="flex flex-col gap-space-md">
+            {% for h in history %}
+            <div class="flex items-start gap-space-md relative pl-10">
+              <div class="absolute left-2.5 w-3 h-3 rounded-full border-2 border-primary bg-surface-container-lowest top-1 -ml-0.5
+                {% if loop.last %}bg-primary{% endif %}"></div>
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-space-sm">
+                  {% if h.new_status %}
+                  <span class="status-{{ h.new_status.lower().replace(' ', '-') }} px-2 py-0.5 rounded-full text-label-sm font-medium">{{ h.new_status }}</span>
+                  {% endif %}
+                  {% if h.new_priority %}
+                  <span class="text-label-sm text-on-surface-variant">Priority → <strong>{{ h.new_priority }}</strong></span>
+                  {% endif %}
+                  <span class="text-label-sm text-on-surface-variant">by {{ h.actor.full_name }}</span>
+                </div>
+                {% if h.note %}
+                <p class="text-body-sm text-on-surface-variant mt-1">{{ h.note }}</p>
+                {% endif %}
+                <span class="text-label-sm text-outline">{{ h.created_at.strftime('%b %d, %Y at %H:%M') }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <h3 class="text-headline-sm font-semibold text-on-surface mb-space-md flex items-center gap-space-sm">
+          <span class="material-symbols-outlined text-secondary text-[20px]">chat</span>
+          Updates & Comments
+        </h3>
+
+        {% if comments %}
+        <div class="flex flex-col gap-space-md mb-space-lg">
+          {% for c in comments %}
+          <div class="bg-surface-container-low p-space-md rounded-xl">
+            <div class="flex items-center justify-between mb-space-xs">
+              <div class="flex items-center gap-space-sm">
+                <div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-label-sm font-bold">{{ c.author.full_name[0].upper() }}</div>
+                <span class="text-label-md font-semibold text-on-surface">{{ c.author.full_name }}</span>
+                <span class="text-label-sm text-on-surface-variant capitalize">({{ c.author.role }})</span>
+              </div>
+              <span class="text-label-sm text-outline">{{ c.created_at.strftime('%b %d, %H:%M') }}</span>
+            </div>
+            <p class="text-body-md text-on-surface leading-relaxed">{{ c.message }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-body-sm text-on-surface-variant mb-space-md">No comments yet.</p>
+        {% endif %}
+
+        <!-- Add Comment -->
+        {% if complaint.status not in ('Resolved', 'Closed') %}
+        <form method="POST" action="{{ url_for('user.add_comment', complaint_id=complaint.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <textarea class="w-full px-space-md py-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-y min-h-[80px]"
+                    name="message" placeholder="Add a comment or update..." required></textarea>
+          <button type="submit" class="mt-space-sm inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-lg bg-primary text-on-primary text-label-lg shadow-sm hover:bg-primary-container transition-all">
+            <span class="material-symbols-outlined text-[18px]">send</span> Post Comment
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-4 flex flex-col gap-space-md sticky top-20">
+      <!-- Complaint Details -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+        <h3 class="text-headline-sm font-semibold text-on-surface mb-space-md">Complaint Details</h3>
+        <dl class="space-y-space-sm text-body-sm">
+          <div class="flex justify-between"><dt class="text-on-surface-variant">Category</dt><dd class="text-on-surface font-medium">{{ complaint.category }}</dd></div>
+          <div class="flex justify-between"><dt class="text-on-surface-variant">Building</dt><dd class="text-on-surface font-medium">{{ complaint.building }}</dd></div>
+          {% if complaint.floor %}<div class="flex justify-between"><dt class="text-on-surface-variant">Floor</dt><dd class="text-on-surface font-medium">{{ complaint.floor }}</dd></div>{% endif %}
+          {% if complaint.room_number %}<div class="flex justify-between"><dt class="text-on-surface-variant">Room</dt><dd class="text-on-surface font-medium">{{ complaint.room_number }}</dd></div>{% endif %}
+          <div class="border-t border-outline-variant pt-space-sm"></div>
+          <div class="flex justify-between"><dt class="text-on-surface-variant">Submitted</dt><dd class="text-on-surface font-medium">{{ complaint.created_at.strftime('%b %d, %Y') }}</dd></div>
+          <div class="flex justify-between"><dt class="text-on-surface-variant">Last Updated</dt><dd class="text-on-surface font-medium">{{ complaint.updated_at.strftime('%b %d, %Y') }}</dd></div>
+          {% if complaint.resolved_at %}<div class="flex justify-between"><dt class="text-on-surface-variant">Resolved</dt><dd class="text-on-surface font-medium">{{ complaint.resolved_at.strftime('%b %d, %Y') }}</dd></div>{% endif %}
+          {% if complaint.assignee %}
+          <div class="border-t border-outline-variant pt-space-sm"></div>
+          <div class="flex items-center gap-space-sm">
+            <span class="material-symbols-outlined text-secondary text-[18px]">engineering</span>
+            <div>
+              <p class="text-label-sm text-on-surface-variant">Assigned To</p>
+              <p class="text-body-md text-on-surface font-semibold">{{ complaint.assignee.full_name }}</p>
+            </div>
+          </div>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

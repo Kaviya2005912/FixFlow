@@ -1,0 +1,25 @@
+/* FixFlow — Additional custom CSS beyond Tailwind utilities */
+
+/* Smooth focus rings */
+*:focus-visible {
+  outline: 2px solid #166534;
+  outline-offset: 2px;
+}
+
+/* Tabular numerics for IDs and dates */
+.font-mono,
+[class*="complaint_id"],
+td.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Table zebra rows */
+tbody tr:nth-child(even) {
+  background-color: #f2fcf2;
+}
+
+/* Scrollbar styling (webkit) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #e6f1e7; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #707a6f; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #404940; }

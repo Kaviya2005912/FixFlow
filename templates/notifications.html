@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Notifications — FixFlow{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto w-full px-gutter py-space-xl flex flex-col gap-space-lg">
+  <h1 class="text-headline-lg font-bold text-on-surface">Notifications</h1>
+
+  <div class="flex flex-col gap-space-sm">
+    {% if notifications %}
+      {% for n in notifications %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex items-start gap-space-md">
+        <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container shrink-0 mt-0.5">
+          <span class="material-symbols-outlined text-[18px]">notifications</span>
+        </div>
+        <div class="flex-1">
+          <p class="text-body-md text-on-surface">{{ n.message }}</p>
+          <span class="text-label-sm text-outline mt-1 block">{{ n.created_at.strftime('%b %d, %Y at %H:%M') }}</span>
+        </div>
+        {% if n.complaint_id %}
+        <a href="{{ url_for('user.complaint_detail', complaint_id=n.complaint_id) }}" class="text-label-sm text-primary font-semibold hover:underline shrink-0">View</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl text-center">
+        <span class="material-symbols-outlined text-[48px] text-outline mx-auto block mb-4">notifications_none</span>
+        <h4 class="text-headline-sm font-semibold text-on-surface">No notifications</h4>
+        <p class="text-body-md text-on-surface-variant mt-1">You're all caught up!</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
